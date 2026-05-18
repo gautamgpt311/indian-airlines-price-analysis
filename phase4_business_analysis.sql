@@ -33,3 +33,35 @@ SELECT
     END AS pricing_label
 FROM with_overall
 ORDER BY pct_vs_overall DESC;
+
+-- Build a flight search system that accepts source city, destination city, class and 
+-- maximum budget as inputs and returns matching flights sorted by price. --
+DELIMITER //
+CREATE PROCEDURE search_flights(IN p_source VARCHAR(50), IN p_destination VARCHAR(50), IN p_class VARCHAR(20),
+    IN p_max_budget INT)
+BEGIN
+    SELECT
+        REPLACE(airline, '_', ' ') AS airline_name,
+        flight AS flight_number,
+        source_city,
+        destination_city,
+        departure_time,
+        arrival_time,
+        stops,
+        duration,
+        class,
+        price,
+        days_left
+    FROM flights
+    WHERE source_city = p_source
+    AND   destination_city = p_destination
+    AND   class = p_class
+    AND   price <= p_max_budget
+    ORDER BY price ASC;
+END //
+DELIMITER ;
+
+-- Test the search system
+CALL search_flights('Delhi', 'Mumbai', 'Economy', 10000);
+CALL search_flights('Delhi', 'Mumbai', 'Business', 80000);
+CALL search_flights('Bangalore', 'Delhi', 'Economy', 8000);
